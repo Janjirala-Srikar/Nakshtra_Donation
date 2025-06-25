@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 5000;
 const URI  = process.env.MONGODB_URI;
 
 /* ---------- GLOBAL MIDDLEWARE ---------- */
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(cors());                             // ← NEW  (default “allow-all”)
 
 /* ---------- ROUTES ---------- */

@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const router = express.Router();
+const nodemailer = require('nodemailer');
 
 const CLIENT = process.env.PAYPAL_CLIENT_ID;
 const SECRET = process.env.PAYPAL_SECRET;
@@ -125,5 +126,74 @@ router.post("/capture-order/:orderId", async (req, res) => {
     res.status(500).json({ error: "Failed to capture PayPal order", details: error.response?.data });
   }
 });
+
+// Add a new route for sending email using nodemailer
+router.post('/send-email', async (req, res) => {
+  const { to_email, transaction_id, amount, status, date, pdf } = req.body;
+
+  const EMAIL_USER = process.env.EMAIL_USER;
+  const EMAIL_PASS = process.env.EMAIL_PASS;
+
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: EMAIL_USER,
+        pass: EMAIL_PASS
+      }
+    });
+
+    const mailOptions = {
+      from: EMAIL_USER,
+      to: to_email,
+      subject: 'Thank You for Your Donation to Bhumi!',
+      html: `
+        <div style="font-family: Arial, sans-serif; background: #f7fafc; padding: 32px; border-radius: 12px; max-width: 600px; margin: auto;">
+          <div style="text-align: center;">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqE5iXeHaFNj-skSCWJ51VtbLYGGGhCWLoDZpCVCQqC6fbXu5ZUsBvoAjAL8_UH2fYDXc&usqp=CAU"
+                 alt="Donation Impact"
+                 style="width: 100%; max-width: 500px; height: auto; display: block; margin: 0 auto 16px auto;" />
+            <h1 style="color: #2563eb; margin-bottom: 8px;">Thank You for Your Generosity!</h1>
+            <p style="font-size: 1.1em; color: #333; margin-bottom: 24px;">Your donation is helping us create a brighter future for children and communities in need.</p>
+          </div>
+          <div style="background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 2px 8px #e0e7ef; margin-bottom: 24px;">
+            <h2 style="color: #2563eb; margin-bottom: 12px;">Donation Details</h2>
+            <ul style="list-style: none; padding: 0; color: #222; font-size: 1em;">
+              <li><strong>Transaction ID:</strong> ${transaction_id}</li>
+              <li><strong>Amount:</strong> $${amount} USD</li>
+              <li><strong>Status:</strong> ${status}</li>
+              <li><strong>Date:</strong> ${date}</li>
+            </ul>
+          </div>
+          <div style="background: #e0f2fe; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+            <h3 style="color: #0e7490; margin-bottom: 8px;">We Appreciate You!</h3>
+            <ul style="color: #0e7490; font-size: 1em; padding-left: 20px;">
+              <li>🌱 Your support enables us to provide education and resources to underprivileged children.</li>
+              <li>🤝 You are now part of a community working for sustainable change.</li>
+              <li>💡 Every contribution, big or small, makes a real difference.</li>
+            </ul>
+          </div>
+          <div style="text-align: center; color: #555; font-size: 0.95em;">
+            <p>With gratitude,<br><strong>The Bhumi Team</strong></p>
+            <p style="margin-top: 16px; color: #888;">This is an automated confirmation for your recent donation. No goods or services were provided in exchange for this contribution.</p>
+          </div>
+        </div>
+      `,
+      attachments: pdf
+        ? [{
+            filename: 'donation_invoice.pdf',
+            content: Buffer.from(pdf, 'base64'),
+            contentType: 'application/pdf'
+          }]
+        : []
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.json({ success: true, message: 'Email sent' });
+  } catch (error) {
+    console.error('❌ Error sending email:', error.message);
+    res.status(500).json({ error: 'Failed to send email', details: error.message });
+  }
+})
 
 module.exports = router;
