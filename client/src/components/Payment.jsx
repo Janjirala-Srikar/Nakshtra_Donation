@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import html2pdf from 'html2pdf.js';
+import axios from 'axios';
 
 const Payment = () => {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -20,15 +21,9 @@ const Payment = () => {
             setLoading(true);
             setError(null);
 
-            const res = await fetch("http://localhost:5000/create-order", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ amount: 10 })
-            });
+            const res = await axios.post("http://localhost:5000/api/payment/create-order", { amount: 10 });
 
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
-            const data = await res.json();
+            const data = res.data;
             return data.id;
           } catch (error) {
             setError(`Failed to create order: ${error.message}`);
@@ -42,13 +37,9 @@ const Payment = () => {
           try {
             setLoading(true);
 
-            const res = await fetch(`http://localhost:5000/capture-order/${data.orderID}`, {
-              method: "POST"
-            });
+            const res = await axios.post(`http://localhost:5000/api/payment/capture-order/${data.orderID}`);
 
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
-            const details = await res.json();
+            const details = res.data;
             setPaymentSuccess(true);
             setPaymentDetails(details);
           } catch (error) {

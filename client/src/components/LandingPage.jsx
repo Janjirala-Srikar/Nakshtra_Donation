@@ -119,7 +119,8 @@ const BhumiLandingPage = () => {
               <button className="text-blue-600 hover:text-blue-700 px-4 py-2 rounded-lg font-medium transition-colors">
                 Volunteer
               </button>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+              <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                onClick={() => window.location.href = '/payment'}>
                 Donate Now
               </button>
               <Link to="/signin">
@@ -163,7 +164,7 @@ const BhumiLandingPage = () => {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button 
-              onClick={() => scrollToSection('donate')}
+              onClick={() => window.location.href = '/payment'}
               className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105"
             >
               Make a Donation
