@@ -4,6 +4,7 @@ const express   = require('express');
 const mongoose  = require('mongoose');
 const cors      = require('cors');          // ← NEW
 const userRoutes = require('./routes/user');
+const paymentRoutes = require('./routes/Payment');
 
 const app  = express();
 const PORT = process.env.PORT || 5000;
@@ -15,6 +16,7 @@ app.use(cors());                             // ← NEW  (default “allow-all�
 
 /* ---------- ROUTES ---------- */
 app.use('/api/users', userRoutes);
+app.use('/api/payment', paymentRoutes);
 
 /* ---------- DB → SERVER BOOTSTRAP ---------- */
 mongoose
